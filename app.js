@@ -3,7 +3,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 let cors = require("cors");
+let { randomUUID } = require("crypto");
 
+//
 var app = express();
 
 app.use(cors());
@@ -13,22 +15,32 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-let users = [
-    {id: 1, name: "Kalle", email: "kalle@mail.com", password: "test"},
-    {id: 2, name: "Anna", email: "anna@mail.com", password: "test"}
-];
+let users = [];
 
 app.get("/users", (req, res) => {
  
     res.json(users);
 })
 
+app.get("/users/:id", (req, res) => {
+
+    let id = req.params.id;
+
+    let user = users.find(user => user.id == id);
+
+    if (user) {
+        res.json(user);
+    } else {
+        res.status(404).json({message: "Ingen sådan användare"});
+    }
+});
+
 app.post("/users", (req, res) => {
 
     console.log(req.body);
 
     let user = {
-        id: users.length + 1,
+        id: randomUUID(),
         name: req.body.name,
         email: req.body.email,
         password: req.body.password
@@ -38,6 +50,8 @@ app.post("/users", (req, res) => {
 
     res.json(user);
 })
+
+
 
 app.delete("/users/:id",(req, res) => {
     let id = req.params.id;
